@@ -6,13 +6,10 @@ __author__ = 'tomas'
 
 
 def test_knowledge_base_add_rule_adds_new_rule():
-    def condition(subject):
-        return subject.get('fruit', '') == 'strawberry'
-
     def consequence(subject):
         subject['color'] = 'red'
 
-    rule = Rule('all strawberries are red', condition, consequence, ('fruit',))
+    rule = Rule('all strawberries are red', {'fruit' : 'strawberry'}, consequence, ('fruit',))
     kb = KnowledgeBase()
 
     kb.add_rule(rule)
@@ -22,13 +19,10 @@ def test_knowledge_base_add_rule_adds_new_rule():
 
 
 def test_knowledge_base_add_rule_and_then_retrieve_it_returns_the_correct_one():
-    def condition(subject):
-        return subject.get('fruit', '') == 'strawberry'
-
     def consequence(subject):
         subject['color'] = 'red'
 
-    rule = Rule('all strawberries are red', condition, consequence, ('fruit',))
+    rule = Rule('all strawberries are red', {'fruit' : 'strawberry'}, consequence, ('fruit',))
     kb = KnowledgeBase()
 
     kb.add_rule(rule)
@@ -38,13 +32,10 @@ def test_knowledge_base_add_rule_and_then_retrieve_it_returns_the_correct_one():
 
 
 def test_knowledge_base_add_rule_twice_should_raise_an_exception():
-    def condition(subject):
-        return subject.get('fruit', '') == 'strawberry'
-
     def consequence(subject):
         subject['color'] = 'red'
 
-    rule = Rule('all strawberries are red', condition, consequence, ('fruit',))
+    rule = Rule('all strawberries are red', {'fruit' : 'strawberry'}, consequence, ('fruit',))
     kb = KnowledgeBase()
 
     kb.add_rule(rule)
@@ -53,20 +44,15 @@ def test_knowledge_base_add_rule_twice_should_raise_an_exception():
 
 
 def test_knowledge_base_add_two_rules_with_same_fields():
-    def condition1(subject):
-        return subject.get('fruit', '') == 'strawberry'
 
     def consequence1(subject):
         subject['color'] = 'red'
 
-    def condition2(subject):
-        return subject.get('fruit', '') == 'kiwi'
-
     def consequence2(subject):
         subject['color'] = 'brown'
 
-    rule1 = Rule('all strawberries are red', condition1, consequence1, ('fruit',))
-    rule2 = Rule('all kiwis are brown', condition1, consequence2, ('fruit',))
+    rule1 = Rule('all strawberries are red', {'fruit' : 'strawberry'}, consequence1, ('fruit',))
+    rule2 = Rule('all kiwis are brown', {'fruit' : 'kiwi'}, consequence2, ('fruit',))
     kb = KnowledgeBase()
 
     kb.add_rule(rule1)
@@ -77,20 +63,14 @@ def test_knowledge_base_add_two_rules_with_same_fields():
     assert len(kb.rules_tree.get(('fruit',))) == 2
 
 def test_forward_chaining():
-    def condition1(subject):
-        return subject.get('animal', '') == 'dog'
-
     def consequence1(subject):
         subject['legsQuantity'] = '4'
-
-    def condition2(subject):
-        return subject.get('legsQuantity', '') == '4'
 
     def consequence2(subject):
         subject['locomotion'] = 'quadrupedalism'
 
-    rule1 = Rule('all dogs have 4 legs', condition1, consequence1, ('animal',))
-    rule2 = Rule('Anything with 4 legs is a quadrupedalism', condition1, consequence2, ('legsQuantity',))
+    rule1 = Rule('all dogs have 4 legs', {'animal' : 'dog'}, consequence1, ('animal',))
+    rule2 = Rule('Anything with 4 legs is a quadrupedalism', {'legsQuantity' : '4'}, consequence2, ('legsQuantity',))
     kb = KnowledgeBase()
 
     kb.add_rule(rule1)
@@ -98,3 +78,52 @@ def test_forward_chaining():
     kb.add_knowledge({'animal': 'dog'})
 
     assert kb.run_forward_chaining() == {'animal': 'dog', 'legsQuantity': '4', 'locomotion': 'quadrupedalism'}
+
+def test_backward_chaining_when_true():
+    def consequence1(subject):
+        subject['legsQuantity'] = '4'
+
+    def consequence2(subject):
+        subject['locomotion'] = 'quadrupedalism'
+
+    rule1 = Rule('all dogs have 4 legs', {'animal' : 'dog'}, consequence1, ('animal',))
+    rule2 = Rule('Anything with 4 legs is a quadrupedalism', {'legsQuantity' : '4'}, consequence2, ('legsQuantity',))
+    kb = KnowledgeBase()
+
+    kb.add_rule(rule1)
+    kb.add_rule(rule2)
+    kb.add_knowledge({'animal': 'dog'})
+
+    assert kb.run_backward_chaining( {'locomotion': 'quadrupedalism'} )
+
+def test_backward_chaining_wrong_hipotesis_when_false():
+    def consequence1(subject):
+        subject['legsQuantity'] = '4'
+
+    def consequence2(subject):
+        subject['locomotion'] = 'quadrupedalism'
+
+    rule1 = Rule('all dogs have 4 legs', {'animal' : 'dog'}, consequence1, ('animal',))
+    rule2 = Rule('Anything with 4 legs is a quadrupedalism', {'legsQuantity' : '4'}, consequence2, ('legsQuantity',))
+    kb = KnowledgeBase()
+
+    kb.add_rule(rule1)
+    kb.add_rule(rule2)
+    kb.add_knowledge({'animal': 'dog'})
+
+    assert kb.run_backward_chaining( {'locomotion': 'bipedal'} ) is False
+
+def test_backward_chaining_missing_rule_when_false():
+    def consequence1(subject):
+        subject['legsQuantity'] = '4'
+
+    def consequence2(subject):
+        subject['locomotion'] = 'quadrupedalism'
+
+    rule2 = Rule('Anything with 4 legs is a quadrupedalism', {'legsQuantity' : '4'}, consequence2, ('legsQuantity',))
+    kb = KnowledgeBase()
+
+    kb.add_rule(rule2)
+    kb.add_knowledge({'animal': 'dog'})
+
+    assert kb.run_backward_chaining( {'locomotion': 'quadrupedalism'} ) is False

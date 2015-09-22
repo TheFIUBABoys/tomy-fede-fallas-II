@@ -13,7 +13,7 @@ class Rule:
 
     def evaluate(self, subject):
         self.validate_fields(subject)
-        rule_applies = self.condition(subject)
+        rule_applies = self.check_condition(subject)
 
         if rule_applies:
             self.consequence(subject)
@@ -24,3 +24,12 @@ class Rule:
         for field in self.fields:
             if subject.get(field) is None:
                 raise Rule.RuleNotApplyException('Rule does not apply to subject')
+
+    def has_consequence(self, testConsecuence):
+        currentConsecuence = {};
+        self.consequence(currentConsecuence)
+
+        return currentConsecuence == testConsecuence;
+
+    def check_condition(self, subject):
+        return subject.get( self.condition.keys()[0], '' ) == self.condition.values()[0]
