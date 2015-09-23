@@ -22,3 +22,4 @@
     cd app
     env/bin/python main.py -h
     env/bin/python main.py -r ./rules.py -i '{"animal": "dog"}' --method=forward -d
+    env/bin/python main.py -r ./rules.py -i '{"animal": "dog"}' -y '{"skin": "hair"}' --method=backward -d
