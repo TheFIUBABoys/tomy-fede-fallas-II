@@ -112,20 +112,36 @@ class BackwardChainingInferenceEngine(InferenceEngine):
     def set_hypothesis(self, hypothesis):
         self.hypothesis = hypothesis
 
-    def run_engine(self):
-        # If already exists at knowledge Knowledge Base
-        if self.knowledge_base.knowledge.get(self.hypothesis.keys()[0]) is not None:
-            # And has the correct value, return true
+    def can_prove_hypothesis(self):
+    	if self.knowledge_base.knowledge.get(self.hypothesis.keys()[0]) is not None:
             return self.knowledge_base.knowledge.get(self.hypothesis.keys()[0]) == self.hypothesis.values()[0]
+        return False
+
+    def run_engine(self):
+    	logger.debug('Current Knowledge: {}\n'.format(self.knowledge_base.get_subject()))
+
+    	return self.engine_iteration()
+
+    def engine_iteration(self):
+    	logger.info('Backward chaining algorithm current hypothesis {}'.format(self.hypothesis))       
+
+        can_prove = self.can_prove_hypothesis()
+        if (can_prove):
+            logger.info('The current Knowledge base CAN prove the hypothesis')
+            return True
+        else:
+        	logger.info('The current Knowledge base CAN\'T prove the hypothesis')
 
         for ruleName in self.rule_set.rules:
             current_rule = self.rule_set.rules[ruleName]
 
             # If the rule has the consequence of the hypothesis
+            logger.debug('Evaluating rule {} : {}'.format(current_rule.name, current_rule.condition_object))
             if current_rule.has_consequence(self.hypothesis):
                 self.hypothesis = current_rule.condition_object
                 # Repeat for the condition of the rule
-                result = self.run_engine()
+                logger.info('Current rule has relevant consequence')
+                result = self.engine_iteration()
                 if result:
                     return True
 

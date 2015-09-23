@@ -38,9 +38,6 @@ def backward_chaining_method(rules, init_knowledge, hypothesis):
 
     logger.info('Result: {}'.format(result))
 
-    logger.info('Final Knowledge')
-    logger.info(json.dumps(knowledge_base.knowledge))
-
 
 def validate_parameters(args):
     if args.init_knowledge is None:
