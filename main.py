@@ -3,7 +3,7 @@ import imp
 import json
 import logging
 import yaml
-from inference_engine.engine import RuleSet, KnowledgeBase, ForwardChainingInferenceEngine, \
+from app.inference_engine.engine import RuleSet, KnowledgeBase, ForwardChainingInferenceEngine, \
     BackwardChainingInferenceEngine
 
 __author__ = 'tomas'

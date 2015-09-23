@@ -1,4 +1,4 @@
-from inference_engine.rule import Rule
+from app.inference_engine.rule import Rule
 
 __author__ = 'tomas'
 
