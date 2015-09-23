@@ -6,6 +6,7 @@ __author__ = 'tomas'
 
 logger = logging.getLogger("Fallas2")
 
+
 class KnowledgeBase:
     class DuplicatedKnowledgeException(Exception):
         pass
@@ -99,12 +100,11 @@ class ForwardChainingInferenceEngine(InferenceEngine):
                 applied_rules)
             iterations += 1
 
-        logger.info('Forward chaining algorithm took {} iterations'.format(iterations-1))
+        logger.info('Forward chaining algorithm took {} iterations'.format(iterations - 1))
         return True
 
 
 class BackwardChainingInferenceEngine(InferenceEngine):
-
     def __init__(self, knowledge_base=None, rule_set=None):
         InferenceEngine.__init__(self, knowledge_base, rule_set)
         self.hypothesis = {}
@@ -113,24 +113,28 @@ class BackwardChainingInferenceEngine(InferenceEngine):
         self.hypothesis = hypothesis
 
     def can_prove_hypothesis(self):
-    	if self.knowledge_base.knowledge.get(self.hypothesis.keys()[0]) is not None:
+        if self.knowledge_base.knowledge.get(self.hypothesis.keys()[0]) is not None:
             return self.knowledge_base.knowledge.get(self.hypothesis.keys()[0]) == self.hypothesis.values()[0]
         return False
 
     def run_engine(self):
-    	logger.debug('Current Knowledge: {}\n'.format(self.knowledge_base.get_subject()))
+        logger.info('STARTING backward chaining algorithm')
+        logger.debug('Initial Knowledge: {}\n'.format(self.knowledge_base.get_subject()))
 
-    	return self.engine_iteration()
+        result = self.engine_iteration()
+
+        logger.info('Backward chaining algorithm finish with result {}'.format(result))
+        return result
 
     def engine_iteration(self):
-    	logger.info('Backward chaining algorithm current hypothesis {}'.format(self.hypothesis))       
+        logger.info('Backward chaining algorithm current hypothesis {}'.format(self.hypothesis))
 
         can_prove = self.can_prove_hypothesis()
-        if (can_prove):
-            logger.info('The current Knowledge base CAN prove the hypothesis')
+        if can_prove:
+            logger.debug('The current Knowledge base CAN prove the hypothesis\n')
             return True
         else:
-        	logger.info('The current Knowledge base CAN\'T prove the hypothesis')
+            logger.debug('The current Knowledge base CAN\'T prove the hypothesis\n')
 
         for ruleName in self.rule_set.rules:
             current_rule = self.rule_set.rules[ruleName]
@@ -140,9 +144,11 @@ class BackwardChainingInferenceEngine(InferenceEngine):
             if current_rule.has_consequence(self.hypothesis):
                 self.hypothesis = current_rule.condition_object
                 # Repeat for the condition of the rule
-                logger.info('Current rule has relevant consequence')
+                logger.debug('Current rule has relevant consequence\n')
                 result = self.engine_iteration()
                 if result:
                     return True
+            else:
+                logger.debug('Current rule has not relevant consequence\n')
 
         return False
