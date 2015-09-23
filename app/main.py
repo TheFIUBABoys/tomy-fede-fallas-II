@@ -33,7 +33,7 @@ def backward_chaining_method(rules, init_knowledge, hypothesis):
     knowledge_base.add_knowledge(yaml.safe_load(init_knowledge))
 
     inference_engine = BackwardChainingInferenceEngine(knowledge_base, rules_set)
-    inference_engine.set_hypothesis(hypothesis)
+    inference_engine.set_hypothesis(yaml.safe_load(hypothesis))
     result = inference_engine.run_engine()
 
     logger.info('Result: {}'.format(result))
