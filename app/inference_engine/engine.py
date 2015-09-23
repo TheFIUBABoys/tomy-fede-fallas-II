@@ -1,9 +1,10 @@
 from abc import abstractmethod
 import logging
-from app.inference_engine.rule import Rule
+from inference_engine.rule import Rule
 
 __author__ = 'tomas'
 
+logger = logging.getLogger("Fallas2")
 
 class KnowledgeBase:
     class DuplicatedKnowledgeException(Exception):
@@ -16,7 +17,7 @@ class KnowledgeBase:
     def add_knowledge(self, new_knowledge):
         if self.knowledge.get(new_knowledge.keys()[0]) is None:
             self.knowledge.update(new_knowledge)
-            logging.debug('Added new knowledge: {}'.format(new_knowledge))
+            logger.debug('Added new knowledge: {}'.format(new_knowledge))
         else:
             raise KnowledgeBase.DuplicatedKnowledgeException
 
@@ -35,7 +36,7 @@ class RuleSet:
     def add_rule(self, rule):
         if self.rules.get(rule.name) is None:
             self.rules[rule.name] = rule
-            logging.debug('Added new rule: {}'.format(rule))
+            logger.debug('Added new rule: "{}"'.format(rule.name))
         else:
             raise RuleSet.DuplicatedRuleException
 
@@ -78,20 +79,27 @@ class ForwardChainingInferenceEngine(InferenceEngine):
         applying_rules = set(self.rule_set.get_applying_rules(self.knowledge_base.get_subject()))
         applied_rules = set()
 
-        logging.debug('Starting forward chaining algorithm')
+        iterations = 1
+
+        logger.info('STARTING forward chaining algorithm')
+        logger.debug('Initial Knowledge: {}\n'.format(self.knowledge_base.get_subject()))
         while len(applying_rules) > 0:
-            logging.debug('There are {} rules to apply. Using the first one'.format(len(applying_rules)))
+            logger.debug('ITERATION {}'.format(iterations))
+            logger.debug('There are {} rules to apply. Using the first one'.format(len(applying_rules)))
             first_rule = list(applying_rules)[0]
 
-            logging.debug('Evaluating rule {}'.format(first_rule.name))
+            logger.debug('Evaluating rule {} : {}'.format(first_rule.name, first_rule.condition_object))
             result = first_rule.evaluate(self.knowledge_base.get_subject())
-            logging.debug('Matches: {}'.format(result))
+            logger.debug('Result: {}'.format(result))
+            logger.debug('Partial Knowledge: {}\n'.format(self.knowledge_base.get_subject()))
 
             applied_rules.add(first_rule)
 
             applying_rules = set(self.rule_set.get_applying_rules(self.knowledge_base.get_subject())).difference(
                 applied_rules)
+            iterations += 1
 
+        logger.info('Forward chaining algorithm took {} iterations'.format(iterations-1))
         return True
 
 
