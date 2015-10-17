@@ -1,0 +1,4 @@
+pytest
+PyYAML
+networkx
+matplotlib		# If you have any problem installing matplotlib just run 'sudo apt-get install libfreetype6-dev'

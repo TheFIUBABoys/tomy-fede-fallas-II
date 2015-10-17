@@ -18,7 +18,13 @@
     env/bin/py.test
     
 ## Run CLI
+
+    ### Inference engine
+
+	env/bin/python main.py -h
+    	env/bin/python main.py -r ./rules.py -i '{"animal": "dog"}' --method=forward -d
+	env/bin/python main.py -r ./rules.py -i '{"animal": "dog"}' -y '{"skin": "hair"}' --method=backward -d
+
+    ### Semantic Network
     
-    env/bin/python main.py -h
-    env/bin/python main.py -r ./rules.py -i '{"animal": "dog"}' --method=forward -d
-    env/bin/python main.py -r ./rules.py -i '{"animal": "dog"}' -y '{"skin": "hair"}' --method=backward -d
+	env/bin/python main.py
